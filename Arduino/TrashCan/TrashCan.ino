@@ -1,9 +1,11 @@
 #include <Servo.h>
-Servo motor; 
-int servoposition = 0;  
+Servo motor;
+int servoposition = 0;
+
 // IR Sensor Pins
 int IRsensor = 8;
 int IRData;
+
 // Ultrasonic sensor Pins
 const int trigPin = 11;
 const int echoPin = 12;
@@ -20,22 +22,32 @@ void setup() {
   motor.attach(7); // Servo Motor
 }
 
-long duration, distance;
+long distance;
 
 void loop() {
   delay(500);
-  // Servo and IR Sensor Logic
-  depth();
-  char reading  = Serial.read(); 
-  if (reading == 'F') {
+  
+  // Ultrasonic Sensor
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  distance = pulseIn(echoPin, HIGH);
+  distance = distance/10;
+  Serial.println(distance);
+  
+  if (distance < 120) {
     digitalWrite(full,HIGH);
     digitalWrite(low,LOW);
     Serial.println("Full");
-  } else if (reading == 'L') {
+  } else {
     digitalWrite(full,LOW);
     digitalWrite(low,HIGH);
     Serial.println("Empty");
   }
+  
+  // IR Sensor and Servo Motor
   IRData = digitalRead(IRsensor);
   if (IRData == 1) {
     motor.write(120);
@@ -44,14 +56,4 @@ void loop() {
     motor.write(0);
     Serial.println("Close");
   }
-}
-void depth()
-{
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  Serial.println(duration/10);
 }
